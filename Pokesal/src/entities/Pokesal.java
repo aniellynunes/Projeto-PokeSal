@@ -12,6 +12,7 @@ public class Pokesal {
   private double spd;
   private double hp;
   private double maxHp;
+  private String efeitoStatus;
 
   public Pokesal(String nome, String tipo, double hp, double atk, double def, double spd) {
     super();
@@ -22,6 +23,7 @@ public class Pokesal {
     this.atk = atk;
     this.def = def;
     this.spd = spd;
+    this.efeitoStatus=null;
   }
 
   public String getNome() {
@@ -79,6 +81,14 @@ public class Pokesal {
   public void setMaxHp(double maxHp) {
     this.maxHp = maxHp;
   }
+
+  public String getEfeitoStatus() {
+		return efeitoStatus;
+	}
+  
+	public void setEfeitoStatus(String efeitoStatus) {
+		this.efeitoStatus = efeitoStatus;
+	}
 
   public static List<Pokesal> getIniciais() {
     List<Pokesal> iniciais = new ArrayList<>();
