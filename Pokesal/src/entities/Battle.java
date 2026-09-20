@@ -67,6 +67,9 @@ public class Battle {
 
   public void atacar(Pokesal atacante, Pokesal defensor, Campo campo) {
     int roll = ra.nextInt(20) + 1;
+    if(atacante.getEfeitoStatus() == "FRZ" || atacante.getEfeitoStatus() == "PAR") {
+			roll -= 2;
+		}
     double buffHit = buffPrecisao(campo, atacante);
     roll *= buffHit;
     int dano = (int) atacante.getAtk();
@@ -76,6 +79,14 @@ public class Battle {
     double danoFinal = dano * reduzirDano * vantagemTipo * buffCampo;
 
     if (roll > 10) {
+
+      int rollEfeitoStatus=r.nextInt(32);
+			if(rollEfeitoStatus<25 && rollEfeitoStatus<30) {
+				if(defensor.getTipo()=="planta") atacante.setEfeitoStatus("PAR");
+				if(defensor.getTipo()=="fogo") atacante.setEfeitoStatus("BRN");
+				if(defensor.getTipo()=="agua") atacante.setEfeitoStatus("FRZ");
+			}
+      
       if (roll >= 18) {
         danoFinal *= 1.5;
         System.out.println("DANO CRITICO! \n" + atacante.getNome() + " causou " + (int) danoFinal + " de dano");
