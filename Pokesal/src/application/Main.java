@@ -9,7 +9,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
+/**
+ * Parte principal do Pokesal.
+ * Gerencia a interface de terminal com o usuário, registrando o nome do
+ * jogador, permitindo a seleção do Pokesal inicial e a escolha de itens gratuitos.
+ */
 public class Main {
+
+  /** Método principal que executa o jogo. */
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
 
