@@ -3,11 +3,20 @@ package entities;
 import java.util.Random;
 import java.util.Scanner;
 
+/**
+ * Controla a lógica principal e o fluxo do sistema de batalhas do jogo.
+ */
 public class Battle {
 
   private final Random ra = new Random();
   private final Scanner sc = new Scanner(System.in);
 
+  /**
+   * Inicia e gerencia o loop principal da batalha entre o jogador e um oponente.
+   *
+   * @param player O treinador controlado pelo jogador.
+   * @param enemy O treinador oponente.
+   */
   public void iniciarBatalha(Trainer player, Enemy enemy) {
     Campo campo = new Campo();
     Pokesal pPlayer = player.getChoosedPokesal();
@@ -65,11 +74,18 @@ public class Battle {
     pPlayer.heal();
   }
 
+  /**
+   * Executa a mecânica de ataque de um Pokesal contra outro.
+   *
+   * @param atacante o Pokesal que realiza o ataque.
+   * @param defensor o Pokesal que recebe o ataque.
+   * @param campo o campo/cenário onde a luta se realiza.
+   */
   public void atacar(Pokesal atacante, Pokesal defensor, Campo campo) {
     int roll = ra.nextInt(20) + 1;
-    if(atacante.getEfeitoStatus() == "FRZ" || atacante.getEfeitoStatus() == "PAR") {
-			roll -= 2;
-		}
+    if (atacante.getEfeitoStatus() == "FRZ" || atacante.getEfeitoStatus() == "PAR") {
+      roll -= 2;
+    }
     double buffHit = buffPrecisao(campo, atacante);
     roll *= buffHit;
     int dano = (int) atacante.getAtk();
@@ -80,13 +96,13 @@ public class Battle {
 
     if (roll > 10) {
 
-      int rollEfeitoStatus=r.nextInt(32);
-			if(rollEfeitoStatus<25 && rollEfeitoStatus<30) {
-				if(defensor.getTipo()=="planta") atacante.setEfeitoStatus("PAR");
-				if(defensor.getTipo()=="fogo") atacante.setEfeitoStatus("BRN");
-				if(defensor.getTipo()=="agua") atacante.setEfeitoStatus("FRZ");
-			}
-      
+      int rollEfeitoStatus = ra.nextInt(32);
+      if (rollEfeitoStatus < 25 && rollEfeitoStatus < 30) {
+        if (defensor.getTipo() == "planta") atacante.setEfeitoStatus("PAR");
+        if (defensor.getTipo() == "fogo") atacante.setEfeitoStatus("BRN");
+        if (defensor.getTipo() == "agua") atacante.setEfeitoStatus("FRZ");
+      }
+
       if (roll >= 18) {
         danoFinal *= 1.5;
         System.out.println("DANO CRITICO! \n" + atacante.getNome() + " causou " + (int) danoFinal + " de dano");
@@ -160,6 +176,12 @@ public class Battle {
     }
   }
 
+  /**
+   * Verifica e exibe o resultado final da batalha.
+   *
+   * @param pPlayer o Pokesal do jogador.
+   * @param pEnemy o Pokesal do oponente.
+   */
   public void resultadoBatalha(Pokesal pPlayer, Pokesal pEnemy) {
     if (pPlayer.getHp() <= 0) {
       System.out.println("O Pokesal adversário venceu a batalha.");
