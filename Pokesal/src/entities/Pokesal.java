@@ -3,6 +3,11 @@ package entities;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Representa uma criatura do tipo Pokesal, contendo seus atributos de combate,
+ * estado de saúde, tipo elemental e métodos para manipulação de status e batalhas.
+ *
+ */
 public class Pokesal {
 
   private String nome;
@@ -14,6 +19,18 @@ public class Pokesal {
   private double maxHp;
   private String efeitoStatus;
 
+  /**
+   * Instância o Pokesal com os atributos especificados.
+   * O HP atual é inicializado com o valor do HP máximo.
+   *  O efeito de status inicia como null.
+   *
+   * @param nome O nome do Pokesal.
+   * @param tipo O tipo elemental do Pokesal.
+   * @param hp O HP máximo e inicial do Pokesal.
+   * @param atk O atributo de ataque.
+   * @param def O atributo de defesa.
+   * @param spd O atributo de velocidade.
+   */
   public Pokesal(String nome, String tipo, double hp, double atk, double def, double spd) {
     super();
     this.nome = nome;
@@ -23,7 +40,7 @@ public class Pokesal {
     this.atk = atk;
     this.def = def;
     this.spd = spd;
-    this.efeitoStatus=null;
+    this.efeitoStatus = null;
   }
 
   public String getNome() {
@@ -83,13 +100,17 @@ public class Pokesal {
   }
 
   public String getEfeitoStatus() {
-		return efeitoStatus;
-	}
-  
-	public void setEfeitoStatus(String efeitoStatus) {
-		this.efeitoStatus = efeitoStatus;
-	}
+    return efeitoStatus;
+  }
 
+  public void setEfeitoStatus(String efeitoStatus) {
+    this.efeitoStatus = efeitoStatus;
+  }
+
+  /**
+   * Retorna uma lista contendo os Pokesals iniciais disponíveis no jogo.
+   *
+   */
   public static List<Pokesal> getIniciais() {
     List<Pokesal> iniciais = new ArrayList<>();
 
@@ -102,10 +123,22 @@ public class Pokesal {
     return iniciais;
   }
 
+  /**
+   * Cria uma nova cópia independente de um Pokesal selecionado.
+   *
+   * @param pokesal O Pokesal a ser clonado/escolhido.
+   * @return Um novo objeto com os mesmos atributos base do modelo selecionado.
+   */
   public static Pokesal escolha(Pokesal pokesal) {
     return new Pokesal(pokesal.nome, pokesal.tipo, pokesal.maxHp, pokesal.atk, pokesal.def, pokesal.spd);
   }
 
+  /**
+   * Calcula o multiplicador de dano com base nos tipos do ataque e do defensor.
+   *
+   * @param tipoAtaque O tipo do ataque executado ("fogo", "agua", "planta").
+   * @param tipoDefensor O tipo do Pokesal que está recebendo o ataque.
+   */
   public double multiplicadorTipo(String tipoAtaque, String tipoDefensor) {
     if (tipoAtaque.equals("fogo") && tipoDefensor.equals("planta")) {
       return 2.0;
@@ -129,6 +162,11 @@ public class Pokesal {
     return 1.0;
   }
 
+  /**
+   * Aplica dano ao Pokesal, reduzindo seu HP atual com base no dano final recebido.
+   *
+   * @param danoFinal O valor total do dano a ser subtraído do HP.
+   */
   public void receberDano(double danoFinal) {
     if (this.hp < 0) {
       this.hp = 0;
@@ -137,6 +175,9 @@ public class Pokesal {
     }
   }
 
+  /**
+   * Restaura o HP atual do Pokesal para o seu valor máximo.
+   */
   public void heal() {
     this.hp = maxHp;
 
