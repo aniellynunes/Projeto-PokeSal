@@ -12,7 +12,7 @@ class CampoTest {
 
     @Test
     @DisplayName("aplicar vantagem elemental baseado no cenário")
-    void buffCenario() {
+    void testEfeitoTerrenoEstacionamentoUCSal() {
         // Arrange
         Campo randomCampo = new Campo();
         Pokesal pokesalFogo = new Pokesal("CharSal", "fogo", 100.0, 10.0, 10.0, 50.0);

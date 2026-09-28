@@ -38,7 +38,7 @@ class PokesalTest {
 
     @Test
     @DisplayName("matriz de vantagem elemental")
-    void MultiplierTipo() {
+    void testVantagemElemental() {
         assertAll("Vantagens",
             () -> assertEquals(2.0, fireType.multiplicadorTipo("fogo", "planta")),
             () -> assertEquals(2.0, waterType.multiplicadorTipo("agua", "fogo")),
