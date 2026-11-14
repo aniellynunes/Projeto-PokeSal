@@ -57,7 +57,7 @@ public class TournamentController {
                 if (!caiuParaLosers) {
                     // Primeira derrota: Player cai para a Losers Bracket e ganha direito à revanche
                     caiuParaLosers = true;
-                    System.out.println("\n⚠️ " + player.getNome() + " caiu para a LOSERS BRACKET! Revanche ativada contra " + oponenteAtual.getNome() + "!");
+                    System.out.println(player.getNome() + " caiu para a LOSERS BRACKET! Revanche ativada contra " + oponenteAtual.getNome() + "!");
                     i--; // Repete o confronto contra o mesmo algoz (Mecânica de Vingança)
                 } else {
                     // Segunda derrota: Player é eliminado definitivamente do torneio
