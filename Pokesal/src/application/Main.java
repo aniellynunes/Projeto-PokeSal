@@ -89,8 +89,8 @@ public class Main {
 		TournamentController torneio = new TournamentController(battle);
 
 		List<Pokesal> iniciais = Pokesal.getIniciais();
-		System.out.println("=== TORNEIO DO ESTACIONAMENTO UCSAL PITUAÇU ===");
-		System.out.println("Escolha seu Pokesal inicial:");
+		System.out.println("TORNEIO POKESAL DA UCSAL");
+		System.out.println("Escolha seu inicial:");
 		for (int i = 0; i < iniciais.size(); i++) {
 			System.out.println((i + 1) + " - " + iniciais.get(i).getNome());
 		}
@@ -109,12 +109,10 @@ public class Main {
 				criarInimigo("Skyla", iniciais.get(0)));
 
 		var campeao = torneio.startTWLosers(player, inimigos);
-
-		System.out.println("\n=============================================");
-		System.out.println("CAMPEÃO DO TORNEIO: " + campeao.getNome());
+		
+		System.out.println("NASCE UM NOVO CAMPEAO: " + campeao.getNome());
 		System.out.println("SalDex do Player: " + player.getPSalDex());
 		System.out.println("Total de Lutas Registradas: " + battleDB.listarTodos().size());
-		System.out.println("=============================================");
 		sc.close();
 	}
 
