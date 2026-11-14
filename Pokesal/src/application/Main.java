@@ -1,114 +1,131 @@
 package application;
 
-import entities.Pokesal;
-import entities.Trainer;
+import controller.BattleController;
+import controller.TournamentController;
 import entities.Enemy;
-import entities.Item;
-import entities.Battle;
+import entities.Trainer;
+import entities.Pokesal;
+import enums.Campos;
+import enums.Items;
+import interfaces.BattleDB;
+import interfaces.BattleEngine;
+import interfaces.CampoService;
+import interfaces.D100;
+import interfaces.SalDexDB;
+import java.time.Clock;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import repositories.BattleRepository;
+import repositories.SalDexRepository;
 
 /**
- * Parte principal do Pokesal.
- * Gerencia a interface de terminal com o usuário, registrando o nome do
- * jogador, permitindo a seleção do Pokesal inicial e a escolha de itens gratuitos.
+ * Ponto de entrada da aplicação no terminal. Instancia os colaboradores reais,
+ * configura os treinadores e inicia o torneio.
  */
 public class Main {
 
-  /** Método principal que executa o jogo. */
-  public static void main(String[] args) {
-    Scanner sc = new Scanner(System.in);
+	/**
+	 * Configura dependências, cria o jogador e os 7 oponentes e inicia o
+	 * campeonato.
+	 */
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		Random random = new Random();
 
-    System.out.print("Digite o seu nome de Treinador: ");
-    String nomePlayer = sc.nextLine();
+		D100 d100Real = new D100() {
+			@Override
+			public int rolarDado100() {
+				return random.nextInt(100) + 1;
+			}
 
-    List<Pokesal> iniciais = Pokesal.getIniciais();
-    System.out.println("Escolha seu pokemon inicial");
-    System.out.println("1 BulbaSal (Planta)");
-    System.out.println("2 CharSal (Fogo)");
-    System.out.println("3 SquirtSal (Agua)");
-    System.out.println("4 ChikoSal (Planta)");
-    System.out.println("5 CyndaSal (Fogo)");
-    System.out.println("6 TotoSal (Agua)");
-    System.out.println("Digite o número da sua escolha: ");
+			@Override
+			public boolean testarChance(double pct) {
+				return (random.nextDouble() * 100.0) < pct;
+			}
+		};
 
-    int option = sc.nextInt();
-    Pokesal choosen = null;
-    while (choosen == null) {
-      switch (option) {
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-          choosen = Pokesal.escolha(iniciais.get(option - 1));
-          break;
-        default:
-          System.out.println("Opção inválida! Escolha entre as opcoes de 1 a 6");
-          break;
-      }
-      Trainer player = new Trainer(nomePlayer);
-      player.choosePokesal(choosen);
-      System.out.println("-> " + player.getChoosedPokesal().getNome() + " adicionado na equipe!");
+		CampoService campoReal = hora -> (hora.getHour() >= 6 && hora.getHour() < 18) ? Campos.ASFALTO_QUENTE
+				: Campos.CANTEIRO_CENTRAL;
 
-      System.out.println("pegue 2 itens gratuitamente");
-      while (player.getBag().size() < 2) {
-        System.out.println("[1] Potion (Cura 20 HP)");
-        System.out.println("[2] X-Atk (Buff atk em 15%)");
-        System.out.println("[3] X-Def (Buff def em 15%)");
-        System.out.println("[4] X-Spd (Buff spd em 15%)");
+		BattleEngine loggerTerminal = new BattleEngine() {
+			@Override
+			public void registrarAtaque(String atacante, String golpe) {
+				System.out.println("\n>> " + atacante + " usou " + golpe + "!");
+			}
 
-        int opcaoItem = sc.nextInt();
-        Item item = null;
+			@Override
+			public void registrarDano(String alvo, int dmg, boolean crit, boolean errou) {
+				if (errou) {
+					System.out.println("   " + alvo + " desviou! O ataque errou.");
+				} else {
+					String msgCrit = crit ? " (ACERTO CRÍTICO!)" : "";
+					System.out.println("   " + alvo + " sofreu " + dmg + " de dano" + msgCrit);
+				}
+			}
 
-        switch (opcaoItem) {
-          case 1:
-            item = new Item("potion");
-            break;
-          case 2:
-            item = new Item("x-atk");
-            break;
-          case 3:
-            item = new Item("x-def");
-            break;
-          case 4:
-            item = new Item("x-spd");
-            break;
-          default:
-            System.out.println("Opção inválida! Escolha um número de 1 a 4.");
-            break;
-        }
+			@Override
+			public void registrarEfeitoStatus(String pokesal, String status) {
+				if (!"NENHUM".equalsIgnoreCase(status)) {
+					System.out.println("   [STATUS] " + pokesal + " está " + status);
+				}
+			}
 
-        if (item != null) {
-          player.getBag().add(item);
-          System.out.println("obteve 1" + item.getNomeItem());
-        }
-      }
+			@Override
+			public void registrarEfeitoTerreno(String terreno, String efeito) {
+				System.out.println("   [ARENA - " + terreno + "] " + efeito);
+			}
 
-      Random r = new Random();
-      int randomPokesal = r.nextInt(iniciais.size());
-      Pokesal pEnemy = Pokesal.escolha(iniciais.get(randomPokesal));
+			@Override
+			public void registrarUsoItem(String treinador, String item) {
+				System.out.println("   [ITEM] " + treinador + " utilizou " + item);
+			}
+		};
 
-      Enemy enemy = new Enemy("Alder", pEnemy);
+		BattleDB battleDB = new BattleRepository();
+		SalDexDB salDexDB = new SalDexRepository();
+		BattleController battle = new BattleController(d100Real, campoReal, Clock.systemDefaultZone(), battleDB,
+				salDexDB, loggerTerminal);
+		TournamentController torneio = new TournamentController(battle);
 
-      enemy.getBag().add(new Item("potion"));
-      enemy.getBag().add(new Item("potion"));
+		List<Pokesal> iniciais = Pokesal.getIniciais();
+		System.out.println("=== TORNEIO DO ESTACIONAMENTO UCSAL PITUAÇU ===");
+		System.out.println("Escolha seu Pokesal inicial:");
+		for (int i = 0; i < iniciais.size(); i++) {
+			System.out.println((i + 1) + " - " + iniciais.get(i).getNome());
+		}
 
-      randomPokesal = r.nextInt(iniciais.size());
-      Pokesal pEnemy2 = Pokesal.escolha(iniciais.get(randomPokesal));
-      Enemy enemy2 = new Enemy("Cynthia", pEnemy2);
-      enemy2.getBag().add(new Item("potion"));
-      enemy2.getBag().add(new Item("potion"));
+		int escolha = sc.hasNextInt() ? sc.nextInt() : 1;
+		int indice = Math.max(0, Math.min(escolha - 1, iniciais.size() - 1));
 
-      System.out.println("\nPreparando o campo de batalha...");
-      Battle b = new Battle();
+		Trainer player = new Trainer("Player");
+		player.choosePokesal(Pokesal.clonar(iniciais.get(indice)));
+		player.addItem(Items.POTION);
+		player.addItem(Items.X_ATK);
 
-      b.iniciarBatalha(player, enemy);
-      b.iniciarBatalha(player, enemy2);
+		List<Enemy> inimigos = List.of(criarInimigo("Cynthia", iniciais.get(0)), criarInimigo("Alder", iniciais.get(1)),
+				criarInimigo("Lance", iniciais.get(2)), criarInimigo("Prof Nogueira", iniciais.get(0)),
+				criarInimigo("Dyantha", iniciais.get(1)), criarInimigo("Dandi", iniciais.get(2)),
+				criarInimigo("Skyla", iniciais.get(0)));
 
-    }
-    sc.close();
-  }
+		var campeao = torneio.startTWLosers(player, inimigos);
+
+		System.out.println("\n=============================================");
+		System.out.println("CAMPEÃO DO TORNEIO: " + campeao.getNome());
+		System.out.println("SalDex do Player: " + player.getPSalDex());
+		System.out.println("Total de Lutas Registradas: " + battleDB.listarTodos().size());
+		System.out.println("=============================================");
+		sc.close();
+	}
+
+	/**
+	 * Fábrica auxiliar para instanciar um oponente já equipado com 1 Pokesal e 2
+	 * itens.
+	 */
+	private static Enemy criarInimigo(String nome, Pokesal base) {
+		Enemy enemy = new Enemy(nome, Pokesal.clonar(base));
+		enemy.addItem(Items.POTION);
+		enemy.addItem(Items.X_ATK);
+		return enemy;
+	}
 }

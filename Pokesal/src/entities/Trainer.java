@@ -1,50 +1,79 @@
 package entities;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import enums.Items;
 
 /**
- * Representa um treinador no jogo, responsável por seu Pokesal escolhido.
- *
+ * Representa um treinador participante do torneio com 1 Pokesal, até 2 itens e
+ * sua própria PokéDex pessoal de criaturas catalogadas.
  */
 public class Trainer {
-  private String nome;
-  private Pokesal choosedPokesal;
-  private List<Item> bag;
+	private final String nome;
+	private Pokesal choosedPokesal;
+	private final List<Items> bag;
+	private final Set<String> pSalDex;
+	private int itensUtilizados;
 
-  /**
-   * Nome do treinador.
-   */
-  public Trainer(String nome) {
-    this.nome = nome;
-    this.bag = new ArrayList<>();
-  }
+	public Trainer(String nome) {
+		this.nome = nome;
+		this.bag = new ArrayList<>();
+		this.pSalDex = new HashSet<>();
+		this.itensUtilizados = 0;
+	}
 
-  /**
-   * O Pokesal atualmente selecionado pelo treinador.
-   */
-  public void choosePokesal(Pokesal pokesal) {
-    this.choosedPokesal = pokesal;
-  }
+	/**
+	 * Define o Pokesal ativo do treinador e o registra automaticamente em sua
+	 * PokéDex pessoal.
+	 */
+	public void choosePokesal(Pokesal pokesal) {
+		this.choosedPokesal = pokesal;
+		if (pokesal != null) {
+			this.pSalDex.add(pokesal.getNome());
+		}
+	}
 
-  /** Lista de itens contidos na mochila do treinador. */
-  public void buyItem(Item item) {
-    if (bag.size() < 2) {
-      bag.add(item);
-    } else {
-      System.out.println("A mochila está cheia!");
-    }
-  }
+	/** Adiciona um Pokesal catalogado à PokéDex pessoal do treinador. */
+	public void registrarSaldex(String alvo) {
+		this.pSalDex.add(alvo);
+	}
 
-  public String getNome() {
-    return nome;
-  }
+	/** Adiciona um item à mochila respeitando o limite máximo de 2 unidades. */
+	public void addItem(Items item) {
+		if (bag.size() < 2) {
+			bag.add(item);
+		}
+	}
 
-  public Pokesal getChoosedPokesal() {
-    return choosedPokesal;
-  }
+	/** Remove e contabiliza o uso do primeiro item disponível na mochila. */
+	public Items consumirPrimeiroItem() {
+		if (!bag.isEmpty()) {
+			itensUtilizados++;
+			return bag.remove(0);
+		}
+		return null;
+	}
 
-  public List<Item> getBag() {
-    return bag;
-  }
+	public String getNome() {
+		return nome;
+	}
+
+	public Pokesal getChoosedPokesal() {
+		return choosedPokesal;
+	}
+
+	public List<Items> getBag() {
+		return bag;
+	}
+
+	public Set<String> getPSalDex() {
+		return pSalDex;
+	}
+
+	public int getUsedItens() {
+		return itensUtilizados;
+	}
 }

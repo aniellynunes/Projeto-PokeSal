@@ -1,185 +1,232 @@
 package entities;
 
+import enums.Campos;
+import enums.Items;
+import enums.Moves;
+import enums.Type;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Representa uma criatura do tipo Pokesal, contendo seus atributos de combate,
- * estado de saúde, tipo elemental e métodos para manipulação de status e batalhas.
- *
+ * Entidade principal de combate (GRASP Information Expert). Gerencia atributos,
+ * 2 golpes elementais + Sal-Move, barra de estresse e aplicação de itens.
  */
 public class Pokesal {
+	private final String nome;
+	private final Type type;
+	private double atk;
+	private double def;
+	private double spd;
+	private double hp;
+	private final double maxHp;
+	private String efeitoStatus;
+	private final List<Moves> golpes;
 
-  private String nome;
-  private String tipo;
-  private double atk;
-  private double def;
-  private double spd;
-  private double hp;
-  private double maxHp;
-  private String efeitoStatus;
+	private int stressBar = 0;
+	private boolean stressAtivo = false;
+	private int acertosSalMove = 0;
+	private boolean salMoveDisponivel = false;
+	private boolean salMoveUsado = false;
 
-  /**
-   * Instância o Pokesal com os atributos especificados.
-   * O HP atual é inicializado com o valor do HP máximo.
-   *  O efeito de status inicia como null.
-   *
-   * @param nome O nome do Pokesal.
-   * @param tipo O tipo elemental do Pokesal.
-   * @param hp O HP máximo e inicial do Pokesal.
-   * @param atk O atributo de ataque.
-   * @param def O atributo de defesa.
-   * @param spd O atributo de velocidade.
-   */
-  public Pokesal(String nome, String tipo, double hp, double atk, double def, double spd) {
-    super();
-    this.nome = nome;
-    this.tipo = tipo;
-    this.maxHp = hp;
-    this.hp = hp;
-    this.atk = atk;
-    this.def = def;
-    this.spd = spd;
-    this.efeitoStatus = null;
-  }
+	public Pokesal(String nome, Type type, double hp, double atk, double def, double spd) {
+		this.nome = nome;
+		this.type = type;
+		this.maxHp = hp;
+		this.hp = hp;
+		this.atk = atk;
+		this.def = def;
+		this.spd = spd;
+		this.golpes = new ArrayList<>();
+		initMoves();
+	}
 
-  public String getNome() {
-    return nome;
-  }
+	/** Preenche os 2 golpes elementais correspondentes ao type do Pokesal. */
+	private void initMoves() {
+		switch (this.type) {
+		case FOGO -> {
+			golpes.add(Moves.EMBER);
+			golpes.add(Moves.FLAMETHROWER);
+		}
+		case AGUA -> {
+			golpes.add(Moves.WATER_GUN);
+			golpes.add(Moves.SURF);
+		}
+		case GRAMA -> {
+			golpes.add(Moves.VINE_WHIP);
+			golpes.add(Moves.ENERGY_BALL);
+		}
+		}
+	}
 
-  public void setNome(String nome) {
-    this.nome = nome;
-  }
+	/** Retorna a lista padrão de Pokesals iniciais dos 3 types elementais. */
+	public static List<Pokesal> getIniciais() {
+		return List.of(new Pokesal("BulbaSal", Type.GRAMA, 45.0, 12.0, 10.0, 45.0),
+				new Pokesal("CharSal", Type.FOGO, 39.0, 14.0, 8.0, 65.0),
+				new Pokesal("SquirtSal", Type.AGUA, 44.0, 11.0, 12.0, 43.0),
 
-  public String getTipo() {
-    return tipo;
-  }
+				new Pokesal("ChikoSal", Type.GRAMA, 45.0, 12.0, 10.0, 45.0),
+				new Pokesal("CyndaSal", Type.FOGO, 39.0, 14.0, 8.0, 65.0),
+				new Pokesal("TotoSal", Type.AGUA, 44.0, 11.0, 12.0, 43.0));
+	}
 
-  public void setTipo(String tipo) {
-    this.tipo = tipo;
-  }
+	/** Clona um Pokesal base para uso independente em batalha (GRASP Creator). */
+	public static Pokesal clonar(Pokesal base) {
+		return new Pokesal(base.nome, base.type, base.maxHp, base.atk, base.def, base.spd);
+	}
 
-  public double getAtk() {
-    return atk;
-  }
+	/**
+	 * Aplica o valor numérico do enum typeItem diretamente no atributo
+	 * correspondente.
+	 */
+	public void aplicarItem(Items item) {
+		switch (item) {
+		case POTION -> curar(item.getEfeito());
+		case X_ATK -> this.atk += item.getEfeito();
+		case X_DEF -> this.def += item.getEfeito();
+		case X_SPD -> this.spd += item.getEfeito();
+		}
+	}
 
-  public void setAtk(double atk) {
-    this.atk = atk;
-  }
+	/** Calcula o multiplicador elemental entre Fogo, Água e Grama. */
+	public static double calcularMultiplicadortype(Type ataque, Type defensor) {
+		if (ataque == Type.FOGO && defensor == Type.GRAMA)
+			return 2.0;
+		if (ataque == Type.AGUA && defensor == Type.FOGO)
+			return 2.0;
+		if (ataque == Type.GRAMA && defensor == Type.AGUA)
+			return 2.0;
 
-  public double getDef() {
-    return def;
-  }
+		if (ataque == Type.GRAMA && defensor == Type.FOGO)
+			return 0.5;
+		if (ataque == Type.FOGO && defensor == Type.AGUA)
+			return 0.5;
+		if (ataque == Type.AGUA && defensor == Type.GRAMA)
+			return 0.5;
 
-  public void setDef(double def) {
-    this.def = def;
-  }
+		return 1.0;
+	}
 
-  public double getSpd() {
-    return spd;
-  }
+	/** Calcula o multiplicador de vantagem concedido pelo cenário atual. */
+	public double obterVantagemTerreno(Campos campo) {
+		if (campo == Campos.ASFALTO_QUENTE && this.type == Type.FOGO)
+			return 1.15;
+		if ((campo == Campos.POCA_DE_CHUVA || campo == Campos.PISO_MOLHADO) && this.type == Type.AGUA)
+			return 1.10;
+		return 1.0;
+	}
 
-  public void setSpd(double spd) {
-    this.spd = spd;
-  }
+	/**
+	 * Incrementa a barra de estresse ao errar um golpe; ativa punição ao atingir 3
+	 * erros.
+	 */
+	public void registrarErroAtaque() {
+		if (!stressAtivo && ++stressBar >= 3) {
+			stressAtivo = true;
+			stressBar = 0;
+		}
+	}
 
-  public double getHp() {
-    return hp;
-  }
+	/**
+	 * Incrementa a barra do Sal-Move ao acertar um golpe; libera o golpe especial
+	 * ao atingir 3 acertos.
+	 */
+	public void registrarAcertoAtaque() {
+		if (!salMoveUsado && ++acertosSalMove >= 3) {
+			salMoveDisponivel = true;
+		}
+	}
 
-  public void setHp(double hp) {
-    this.hp = hp;
-  }
+	/** Retorna o movimento especial Sal-Move correspondente ao type do Pokesal. */
+	public Moves obterSalMove() {
+		return switch (this.type) {
+		case FOGO -> Moves.FIRE_BLAST;
+		case AGUA -> Moves.HYDRO_PUMP;
+		case GRAMA -> Moves.SOLAR_BEAM;
+		};
+	}
 
-  public double getMaxHp() {
-    return maxHp;
-  }
+	/** Consome o uso único do Sal-Move na batalha atual. */
+	public void useSalMove() {
+		this.salMoveDisponivel = false;
+		this.salMoveUsado = true;
+		this.acertosSalMove = 0;
+	}
 
-  public void setMaxHp(double maxHp) {
-    this.maxHp = maxHp;
-  }
+	/** Subtrai dano do HP atual garantindo que não fique negativo. */
+	public void receberDano(double dano) {
+		this.hp = Math.max(0, this.hp - dano);
+	}
 
-  public String getEfeitoStatus() {
-    return efeitoStatus;
-  }
+	/** Restaura HP respeitando o limite máximo. */
+	public void curar(double qtd) {
+		this.hp = Math.min(this.maxHp, this.hp + qtd);
+	}
 
-  public void setEfeitoStatus(String efeitoStatus) {
-    this.efeitoStatus = efeitoStatus;
-  }
+	/** Restaura totalmente o HP e reseta barras temporárias de batalha. */
+	public void fullRestore() {
+		this.hp = maxHp;
+		this.efeitoStatus = null;
+		this.stressBar = 0;
+		this.stressAtivo = false;
+		this.acertosSalMove = 0;
+		this.salMoveDisponivel = false;
+		this.salMoveUsado = false;
+	}
 
-  /**
-   * Retorna uma lista contendo os Pokesals iniciais disponíveis no jogo.
-   *
-   */
-  public static List<Pokesal> getIniciais() {
-    List<Pokesal> iniciais = new ArrayList<>();
+	public String getNome() {
+		return nome;
+	}
 
-    iniciais.add(new Pokesal("BulbaSal", "planta", 45.0, 12.0, 10.0, 45.0));
-    iniciais.add(new Pokesal("CharSal", "fogo", 39, 14, 8, 65));
-    iniciais.add(new Pokesal("SquirtSal", "agua", 44, 11, 12, 43));
-    iniciais.add(new Pokesal("ChikoSal", "planta", 45, 11, 12, 49));
-    iniciais.add(new Pokesal("CyndaSal", "fogo", 39, 13, 9, 65));
-    iniciais.add(new Pokesal("TotoSal", "agua", 50, 14, 10, 43));
-    return iniciais;
-  }
+	public Type getType() {
+		return type;
+	}
 
-  /**
-   * Cria uma nova cópia independente de um Pokesal selecionado.
-   *
-   * @param pokesal O Pokesal a ser clonado/escolhido.
-   * @return Um novo objeto com os mesmos atributos base do modelo selecionado.
-   */
-  public static Pokesal escolha(Pokesal pokesal) {
-    return new Pokesal(pokesal.nome, pokesal.tipo, pokesal.maxHp, pokesal.atk, pokesal.def, pokesal.spd);
-  }
+	public double getAtk() {
+		return atk;
+	}
 
-  /**
-   * Calcula o multiplicador de dano com base nos tipos do ataque e do defensor.
-   *
-   * @param tipoAtaque O tipo do ataque executado ("fogo", "agua", "planta").
-   * @param tipoDefensor O tipo do Pokesal que está recebendo o ataque.
-   */
-  public double multiplicadorTipo(String tipoAtaque, String tipoDefensor) {
-    if (tipoAtaque.equals("fogo") && tipoDefensor.equals("planta")) {
-      return 2.0;
-    }
-    if (tipoAtaque.equals("agua") && tipoDefensor.equals("fogo")) {
-      return 2.0;
-    }
-    if (tipoAtaque.equals("planta") && tipoDefensor.equals("agua")) {
-      return 2.0;
-    }
-    if (tipoAtaque.equals("planta") && tipoDefensor.equals("fogo")) {
-      return 0.5;
-    }
-    if (tipoAtaque.equals("fogo") && tipoDefensor.equals("agua")) {
-      return 0.5;
-    }
-    if (tipoAtaque.equals("agua") && tipoDefensor.equals("planta")) {
-      return 0.5;
-    }
+	public double getDef() {
+		return def;
+	}
 
-    return 1.0;
-  }
+	public double getSpd() {
+		return spd;
+	}
 
-  /**
-   * Aplica dano ao Pokesal, reduzindo seu HP atual com base no dano final recebido.
-   *
-   * @param danoFinal O valor total do dano a ser subtraído do HP.
-   */
-  public void receberDano(double danoFinal) {
-    if (this.hp < 0) {
-      this.hp = 0;
-    } else {
-      this.hp -= danoFinal;
-    }
-  }
+	public double getHp() {
+		return hp;
+	}
 
-  /**
-   * Restaura o HP atual do Pokesal para o seu valor máximo.
-   */
-  public void heal() {
-    this.hp = maxHp;
+	public void setHp(double hp) {
+		this.hp = Math.max(0, hp);
+	}
 
-  }
+	public double getMaxHp() {
+		return maxHp;
+	}
+
+	public String getEfeitoStatus() {
+		return efeitoStatus;
+	}
+
+	public void setEfeitoStatus(String status) {
+		this.efeitoStatus = status;
+	}
+
+	public List<Moves> getGolpes() {
+		return golpes;
+	}
+
+	public boolean getStressAtivo() {
+		return stressAtivo;
+	}
+
+	public void setStressAtivo(boolean estresseAtivo) {
+		this.stressAtivo = estresseAtivo;
+	}
+
+	public boolean isSalMoveDisponivel() {
+		return salMoveDisponivel;
+	}
 }
