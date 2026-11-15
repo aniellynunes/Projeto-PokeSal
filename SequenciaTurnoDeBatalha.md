@@ -1,4 +1,4 @@
-# Diagrama de Sequência UML — Turno de Batalha
+# Turno de Batalha
 
 ```mermaid
 sequenceDiagram
