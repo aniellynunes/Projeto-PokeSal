@@ -1,5 +1,7 @@
 ```mermaid
 
+Diagrama de Classes
+
     %% PACOTE ENUMS
     namespace enums {
         class Type {
