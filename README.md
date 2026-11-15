@@ -1,6 +1,6 @@
 ```mermaid
-
-Diagrama de Classes
+classDiagram
+    directionTB
 
     %% PACOTE ENUMS
     namespace enums {
