@@ -1,4 +1,4 @@
-```mermaid
+@startuml
 title PokeSal — Turno de Batalha
 actor Player
 participant Enemy
@@ -47,5 +47,4 @@ BattleController -> BattleController: definir vencedor e perdedor
 BattleController -> SalDexDB: consultar/salvar descoberta
 BattleController -> BattleDB: salvar(BattleLog)
 BattleController --> Player: retorna Trainer vencedor
-    end
-```
+@enduml
