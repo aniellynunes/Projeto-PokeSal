@@ -1,12 +1,15 @@
 # Diagrama de Sequência UML — Turno de Batalha
 
-## Diagrama
+```mermaid
+sequenceDiagram
+    actor Jogador
+    participant BC as BattleController
+    participant P as Pokesal
+    participant BR as BattleRepository
 
-![Diagrama de sequência do turno de batalha](./uml_sequencia_turno_batalha.jpeg)
-
-## Código PlantUML
-
-```plantuml
-@startuml
-' Código do diagrama aqui
-@enduml
+    Jogador->>BC: Escolhe golpe
+    BC->>P: Executa ataque
+    P-->>BC: Retorna resultado
+    BC->>BC: Calcula dano
+    BC->>BR: Registra resultado
+    BC-->>Jogador: Exibe resultado
