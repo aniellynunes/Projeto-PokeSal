@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>br.ucsal</groupId>
+  <artifactId>pokesal</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.version>5.10.2</junit.version>
+    <mockito.version>5.12.0</mockito.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <!-- Mantém a estrutura do projeto Eclipse: código em src/, testes em test/ -->
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test</testSourceDirectory>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <!-- Legado que não compila contra o Pokesal atual (usa getTipo(), setAtk(), etc.)
+               e não é referenciado pelo código vigente. -->
+          <excludes>
+            <exclude>entities/Battle.java</exclude>
+            <exclude>entities/Campo.java</exclude>
+            <exclude>entities/Item.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.16</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
