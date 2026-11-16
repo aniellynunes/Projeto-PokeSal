@@ -87,7 +87,7 @@ class TournamentControllerTest {
 
 	@Test
 	@DisplayName("Chaveamento: jogador vence todas as fases e é campeão")
-	void testJogadorVenceTodasAsFasesEhCampeao() {
+	void testJogadorVenceTodasAsFasesECampeao() {
 		when(battleController.iniciarBatalha(jogador, rival1)).thenReturn(jogador);
 		when(battleController.iniciarBatalha(jogador, rival2)).thenReturn(jogador);
 		when(battleController.iniciarBatalha(jogador, rival3)).thenReturn(jogador);
@@ -101,7 +101,7 @@ class TournamentControllerTest {
 
 	@Test
 	@DisplayName("Chaveamento: jogador eliminado não enfrenta os próximos rivais")
-	void testJogadorEliminadoNaChaveSimplesNaoEnfrentaProximosRivais() {
+	void testPlayerEliminadoNoChaveamentoSimplesNLutaMais() {
 		when(battleController.iniciarBatalha(jogador, rival1)).thenReturn(rival1);
 
 		Trainer campeao = torneio.startTournament(jogador, List.of(rival1, rival2, rival3));
@@ -114,7 +114,7 @@ class TournamentControllerTest {
 
 	@Test
 	@DisplayName("Torneio de 8 participantes: 7 lutas contra qualquer rival")
-	void testTorneioDeOitoParticipantesEnfrentaSeteRivais() {
+	void testPlayerTemSeteLutasEmTorneioDeOito() {
 		List<Enemy> sete = new ArrayList<>();
 		for (int i = 1; i <= 7; i++) {
 			sete.add(new Enemy("Rival" + i, pokesal("Sal" + i)));
@@ -130,7 +130,7 @@ class TournamentControllerTest {
 
 	@Test
 	@DisplayName("Número inválido de participantes é rejeitado antes de qualquer luta")
-	void testNumeroInvalidoDeParticipantesNaoIniciaNenhumaLuta() {
+	void testNumeroInvalidoDeParticipantesAnulaTorneio() {
 		List<Enemy> doisRivais = List.of(rival1, rival2); // 3 participantes no total
 
 		assertThrows(IllegalArgumentException.class, () -> torneio.startTournament(jogador, doisRivais));
@@ -145,8 +145,8 @@ class TournamentControllerTest {
 	// =====================================================================
 
 	@Test
-	@DisplayName("Losers Bracket: 1ª derrota gera revanche contra o mesmo algoz")
-	void testLosersBracketConcedeRevancheContraOMesmoAlgoz() {
+	@DisplayName("Losers Bracket: 1ª derrota gera revanche contra o mesmo oponente")
+	void testLosersBracketConcedeRevanche() {
 		// retornos em sequência: perde a 1ª luta contra rival1 e ganha a revanche
 		when(battleController.iniciarBatalha(jogador, rival1)).thenReturn(rival1, jogador);
 		when(battleController.iniciarBatalha(jogador, rival2)).thenReturn(jogador);
@@ -161,8 +161,8 @@ class TournamentControllerTest {
 	}
 
 	@Test
-	@DisplayName("Losers Bracket: 2ª derrota elimina definitivamente o jogador")
-	void testSegundaDerrotaNaLosersBracketEliminaOJogador() {
+	@DisplayName("Losers Bracket: 2ª derrota elimina o jogador")
+	void testDerrotaLosersEliminaPlayer() {
 		when(battleController.iniciarBatalha(jogador, rival1)).thenReturn(rival1, rival1);
 
 		Trainer campeao = torneio.startTWLosers(jogador, List.of(rival1, rival2, rival3));
@@ -184,7 +184,7 @@ class TournamentControllerTest {
 	
 	@Test
 	@DisplayName("Losers Bracket com 8 participantes: vence invicto sem acionar repescagem")
-	void testLosersBracketOitoParticipantesInvicto() {
+	void testLosersBracketOitoMatchUpsSeguidas() {
 		List<Enemy> sete = new ArrayList<>();
 		for (int i = 1; i <= 7; i++) {
 			sete.add(new Enemy("Rival" + i, pokesal("Sal" + i)));
