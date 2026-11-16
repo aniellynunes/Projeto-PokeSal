@@ -174,7 +174,7 @@ public class BattleController {
 				log.registrarEfeitoTerreno(campo.name(), "Inativo durante a noite");
 			}
 		} else if (campo.equals(Campos.CANTEIRO_CENTRAL)) {
-			combatentes.stream().filter(p -> p.getType().equals(Type.GRAMA))
+			combatentes.stream().filter(p -> p.getHp() > 0 && p.getType().equals(Type.GRAMA))
 					.forEach(p -> p.curar(Math.max(1, Math.floor(p.getMaxHp() * 0.05))));
 			log.registrarEfeitoTerreno(campo.name(), "Cura vegetal aplicada");
 		} else {
