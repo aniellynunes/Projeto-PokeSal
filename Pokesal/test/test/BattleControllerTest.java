@@ -130,7 +130,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Sem crítico: dano base (contraste do teste de crítico)")
-	void testAcertoSemCriticoCausaDanoBase() {
+	void testDanoSemCritico() {
 		when(d100.rolarDado100()).thenReturn(50);
 		when(d100.testarChance(6.25)).thenReturn(false);
 
@@ -180,7 +180,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Asfalto quente só causa dano térmico durante o dia")
-	void testAsfaltoQuenteApenasDuranteODia() throws Exception {
+	void testAsfaltoQuenteSoDeDia() throws Exception {
 		prepararDadosSemCritico();
 
 		// ---------- DIA (12:00): relógio e serviço de terreno mockados ----------
@@ -216,7 +216,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Ordem das chamadas ao registro de batalha em um turno")
-	void testSequenciaDeEventosNoTurno() throws Exception {
+	void testSequenciaDeEventosTurno() throws Exception {
 		prepararArena(DIA, HORA_DIA, Campos.ASFALTO_QUENTE);
 		prepararDadosSemCritico();
 		Enemy rival = criarRivalFragilComPocao();
@@ -239,7 +239,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("ArgumentCaptor: resultado salvo com vencedor, perdedor e turnos")
-	void testResultadoSalvoAoFimDaBatalha() throws Exception {
+	void testResultadoBatalhaSalvo() throws Exception {
 		prepararArena(DIA, HORA_DIA, Campos.ASFALTO_QUENTE);
 		prepararDadosSemCritico();
 		Enemy rival = criarRivalFragilComPocao();
@@ -295,7 +295,7 @@ class BattleControllerTest {
 	// Teste requisito autoral 1
 	@Test
 	@DisplayName("Vingança: golpe igual ao que derrotou o defensor causa metade do dano")
-	void testVingancaReduzDanoQuandoGolpeIgualAoQueDerrotou() throws Exception {
+	void testVingancaReduzDanoDoGolpeDeNocaute() throws Exception {
 		prepararDadosSemCritico();
 		// ordem dos argumentos importa: (perdedor, vencedor) => valores exatos
 		when(battleDB.findLastHit("Gary", "Ash")).thenReturn(Optional.of(Moves.WATER_GUN));
@@ -310,7 +310,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Vingança: golpe diferente do que derrotou não reduz o dano")
-	void testVingancaNaoSeAplicaQuandoGolpeEhDiferente() throws Exception {
+	void testVingancaNaoSeAplicaQndMoveIsDiferent() throws Exception {
 		prepararDadosSemCritico();
 		when(battleDB.findLastHit("Gary", "Ash")).thenReturn(Optional.of(Moves.SURF));
 
@@ -322,7 +322,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Vingança combinada com crítico: 20 * 0.5 * 1.5 = 15")
-	void testVingancaCombinadaComCritico() throws Exception {
+	void testVingancaComCritico() throws Exception {
 		when(d100.rolarDado100()).thenReturn(50);
 		when(d100.testarChance(6.25)).thenReturn(true);
 		when(battleDB.findLastHit("Gary", "Ash")).thenReturn(Optional.of(Moves.WATER_GUN));
@@ -336,7 +336,7 @@ class BattleControllerTest {
 	// Teste requisito autoral 2
 	@Test
 	@DisplayName("SalDex: Pokesal derrotado é catalogado ao fim da batalha")
-	void testSalDexCatalogaPokesalDerrotadoAoFimDaBatalha() throws Exception {
+	void testSalDexCatalogaPokesalDerrotado() throws Exception {
 		prepararArena(DIA, HORA_DIA, Campos.ASFALTO_QUENTE);
 		prepararDadosSemCritico();
 		Enemy rival = criarRivalFragilComPocao();
@@ -353,7 +353,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("SalDex: Sal-Move cataloga o próprio Pokesal do atacante")
-	void testSalMoveCatalogaOProprioPokesalDoAtacante() throws Exception {
+	void testSalMoveCatalogaPokesalAtacante() throws Exception {
 		prepararDadosSemCritico();
 		when(salDex.discovered("Squirt")).thenReturn(false);
 
@@ -410,7 +410,7 @@ class BattleControllerTest {
 
 	/**
 	 * Rival com 10 de HP e uma poção: cai no primeiro golpe de WATER_GUN (20 de
-	 * dano), então a batalha dura exatamente 1 turno.
+	 * dano), então, batalha de 1 turno.
 	 */
 	private static Enemy criarRivalFragilComPocao() {
 		Enemy rival = new Enemy("Gary", pokesal("Totodile", 10, 20, 40));
@@ -422,8 +422,6 @@ class BattleControllerTest {
 	private void prepararArena(Instant instante, LocalTime hora, Campos campo) {
 		when(clock.instant()).thenReturn(instante);
 		when(clock.getZone()).thenReturn(ZoneOffset.UTC);
-		// valor exato: garante que o controller consultou o terreno com a hora do
-		// relógio
 		when(campoService.getField(hora)).thenReturn(campo);
 	}
 
@@ -432,7 +430,6 @@ class BattleControllerTest {
 	 */
 	private void prepararDadosSemCritico() {
 		when(d100.rolarDado100()).thenReturn(50);
-		// nestes cenários o limiar de crítico não é o foco: matcher
 		when(d100.testarChance(anyDouble())).thenReturn(false);
 	}
 
@@ -459,7 +456,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Poça de Chuva e Piso Molhado dão bônus a Água, mas sem dano passivo no turno")
-	void testTerrenosMolhadosSemEfeitoPassivo() {
+	void testTerrenosTipoAguaSemEfeitoPassivo() {
 		prepararArena(DIA, HORA_DIA, Campos.POCA_DE_CHUVA);
 		prepararDadosSemCritico();
 		Enemy rival = new Enemy("Gary", pokesal("Totodile", 10, 20, 40));
@@ -471,8 +468,8 @@ class BattleControllerTest {
 	}
 
 	@Test
-	@DisplayName("Jogador pode usar item da mochila e disparar Sal-Move pelo console")
-	void testJogadorUsaItemEDisparaSalMove() {
+	@DisplayName("Jogador pode usar item da mochila e usar Sal-Move")
+	void testPlayerUseItemAndSalMove() {
 		// Turno 1: 2 (Poção) | Turnos 2, 3, 4: 1 e 1 (3x EMBER) | Turno 5: 1 e 3 (FIRE_BLAST)
 		String cmds = "2\n1\n1\n1\n1\n1\n1\n1\n3\n";
 		System.setIn(new ByteArrayInputStream(cmds.getBytes(StandardCharsets.UTF_8)));
@@ -496,7 +493,7 @@ class BattleControllerTest {
 	
 	@Test
 	@DisplayName("Estresse: errar 3 golpes seguidos causa dano de recuo no turno seguinte")
-	void testEstresseCausaDanoDeRecuoAposTresErros() {
+	void testRecuoStress() {
 		prepararArena(NOITE, HORA_NOITE, Campos.CANTEIRO_CENTRAL);
 		when(d100.rolarDado100()).thenReturn(99, 99, 99, 99, 99, 99, 10);
 		when(d100.testarChance(anyDouble())).thenReturn(false);
@@ -511,7 +508,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Status negativo ativo no defensor é exibido no registro de dano")
-	void testStatusAtivoNoDefensorERegistrado() {
+	void testRegistrarEfeitoStatusNoDefensor() {
 		prepararDadosSemCritico();
 		gary.getChoosedPokesal().setEfeitoStatus("QUEIMADO");
 
@@ -523,7 +520,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Inimigo dispara seu Sal-Move automaticamente assim que a barra carrega")
-	void testInimigoDisparaSalMoveQuandoLiberado() {
+	void testEnemySalMoveUse() {
 		Pokesal sal = new Pokesal("CharSal", Type.FOGO, 100, 15, 10, 60);
 		sal.registrarAcertoAtaque();
 		sal.registrarAcertoAtaque();
@@ -538,7 +535,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Itens de batalha: X_ATK, X_DEF, X_SPD e POTION alteram atributos do Pokesal")
-	void testAplicacaoDeItensNosAtributosDoPokesal() {
+	void testUseXItensOnPokesal() {
 		Pokesal sal = Pokesal.clonar(Pokesal.getIniciais().get(0));
 		sal.setHp(10);
 
@@ -555,7 +552,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Vantagens elementais: Fogo, Água e Grama respeitam multiplicadores x2 e x0.5")
-	void testMultiplicadoresElementaisEntreTipos() {
+	void testMultiplicadoresElementais() {
 		assertEquals(2.0, Pokesal.calcularMultiplicadortype(Type.FOGO, Type.GRAMA), 0.001);
 		assertEquals(2.0, Pokesal.calcularMultiplicadortype(Type.AGUA, Type.FOGO), 0.001);
 		assertEquals(2.0, Pokesal.calcularMultiplicadortype(Type.GRAMA, Type.AGUA), 0.001);
@@ -567,7 +564,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Mochila do treinador respeita o limite máximo de 2 itens")
-	void testMochilaDoTreinadorRespeitaLimiteDeDoisItens() {
+	void testLimiteBag() {
 		Trainer red = new Trainer("Red");
 		red.choosePokesal(null);
 		assertNull(red.consumirPrimeiroItem());
@@ -583,7 +580,7 @@ class BattleControllerTest {
 
 	@Test
 	@DisplayName("Repositórios em memória salvam e consultam lutas e Pokesals")
-	void testRepositoriosDeBatalhaESalDex() {
+	void testRepositories() {
 		BattleRepository bRepo = new BattleRepository();
 		bRepo.salvar(new BattleLog("Ash", "Gary", Moves.SURF, 3, "Squirt vs Totodile"));
 
